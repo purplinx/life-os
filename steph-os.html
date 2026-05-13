@@ -772,6 +772,7 @@ body{background:var(--bg);color:var(--t);font-family:'Inter',system-ui,-apple-sy
     </div>
     <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <span id="sb-sync" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3)"></span>
+      <button onclick="testSync()" style="background:none;border:none;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);cursor:pointer;padding:0;text-decoration:underline">test sync</button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between">
       <span id="sb-storage" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3)">— KB used</span>
@@ -4029,8 +4030,25 @@ const _sbHeaders = {
 };
 
 function initSupabase() {
-  // Nothing to initialise — REST API works directly
   setSyncStatus('');
+}
+
+async function testSync() {
+  const msg = ['--- SYNC TEST ---'];
+  msg.push('URL: ' + SB_URL);
+  msg.push('Key: ' + SB_KEY.slice(0, 20) + '...');
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/user_store?id=eq.${SB_ROW}&select=id,updated_at`,
+      { headers: _sbHeaders }
+    );
+    msg.push('Status: ' + res.status);
+    const text = await res.text();
+    msg.push('Response: ' + text.slice(0, 200));
+  } catch(e) {
+    msg.push('ERROR: ' + e.message);
+  }
+  alert(msg.join('\n'));
 }
 
 function setSyncStatus(status) {
