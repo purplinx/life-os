@@ -49,9 +49,9 @@
 }
 [data-theme="day"] body{background:var(--bg)}
 [data-theme="day"] .sb{background:#e4ddd4;border-right-color:var(--bd)}
-[data-theme="day"] .mob-nav{background:#e4ddd4;border-top-color:var(--bd)}
-[data-theme="day"] .mob-drawer-sheet{background:#e4ddd4}
-[data-theme="day"] .mob-drawer-btn{background:var(--sf);border-color:var(--bd);color:var(--t2)}
+[data-theme="day"] .mob-nav{background:rgba(228,221,212,.88);border-top-color:rgba(140,120,100,.15)}
+[data-theme="day"] .mob-drawer-sheet{background:rgba(232,226,218,.97)}
+[data-theme="day"] .mob-drawer-btn{background:rgba(255,255,255,.5);border-color:rgba(140,120,100,.15);color:var(--t2)}
 [data-theme="day"] .main::-webkit-scrollbar-thumb{background:var(--bd2)}
 [data-theme="day"] .inp{background:var(--sf3);border-color:var(--bd);color:var(--t)}
 [data-theme="day"] .inp:focus{border-color:var(--gold)}
@@ -129,18 +129,37 @@ body{background:var(--bg);color:var(--t);font-family:'Inter',system-ui,-apple-sy
 @keyframes fadeIn{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── MOBILE NAV ── */
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--mob-nav);background:#0b0b10;border-top:1px solid var(--bd);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.mob-nav-inner{display:flex;height:100%}
-.mob-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:0;color:var(--t3);cursor:pointer;transition:color .12s;padding:0;font-family:'Inter',system-ui,sans-serif}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(9,9,11,.82);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border-top:1px solid rgba(255,255,255,.07);
+  padding-bottom:env(safe-area-inset-bottom);
+  height:calc(var(--mob-nav) + env(safe-area-inset-bottom));
+}
+.mob-nav-inner{display:flex;height:var(--mob-nav)}
+.mob-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:0;color:var(--t3);cursor:pointer;transition:color .18s;padding:0;font-family:'Inter',system-ui,sans-serif;position:relative;min-height:44px}
 .mob-btn.active{color:var(--gold)}
-.mob-btn .mi{font-size:18px}
-.mob-btn .ml{font-size:9px;font-weight:600;letter-spacing:.02em}
+.mob-btn.active::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:32px;height:3px;border-radius:99px;background:var(--gold);opacity:.8}
+.mob-btn .mi{font-size:22px;line-height:1;margin-top:4px}
+.mob-btn .ml{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
 .mob-drawer{position:fixed;inset:0;z-index:200;display:none}
 .mob-drawer.open{display:block}
-.mob-drawer-bg{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
-.mob-drawer-sheet{position:absolute;bottom:0;left:0;right:0;background:#0b0b10;border-top:1px solid var(--bd);border-radius:16px 16px 0 0;padding:12px 16px calc(var(--mob-nav) + 20px);display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mob-drawer-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid var(--bd);border-radius:var(--r2);background:var(--sf);color:var(--t2);cursor:pointer;font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;text-align:left}
+.mob-drawer-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px)}
+.mob-drawer-sheet{position:absolute;bottom:0;left:0;right:0;
+  background:rgba(14,14,20,.95);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-radius:20px 20px 0 0;
+  padding:8px 16px calc(var(--mob-nav) + env(safe-area-inset-bottom) + 12px);
+}
+.mob-drawer-handle{width:36px;height:4px;border-radius:99px;background:rgba(255,255,255,.2);margin:8px auto 16px}
+.mob-drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mob-drawer-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.05);color:var(--t2);cursor:pointer;font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s}
+.mob-drawer-btn:active{background:rgba(255,255,255,.1);transform:scale(.98)}
 .mob-drawer-btn.active{background:var(--gd);border-color:var(--gb);color:var(--gold)}
+.mob-drawer-btn .mdi{font-size:18px;width:24px;text-align:center;flex-shrink:0}
 
 /* ── PAGE HEADER ── */
 .ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:28px;flex-wrap:wrap}
@@ -434,35 +453,52 @@ body{background:var(--bg);color:var(--t);font-family:'Inter',system-ui,-apple-sy
 @media(max-width:768px){
   html,body{overflow:hidden}
   .sb{display:none}
-  .main{height:calc(100vh - var(--mob-nav));height:calc(100dvh - var(--mob-nav))}
-  .mob-nav{display:flex;height:calc(var(--mob-nav) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
-  .mob-nav-inner{height:var(--mob-nav)}
-  .mob-btn .mi{font-size:20px}
-  .mob-btn .ml{font-size:10px}
-  .panel{padding:16px 14px 24px}
-  .ph{padding-bottom:12px;margin-bottom:12px}
-  .ph-title{font-size:18px;letter-spacing:-.3px}
-  .ph-sub{font-size:11px}
-  .stats{grid-template-columns:1fr 1fr;gap:8px}
-  .card{padding:14px}
-  .stat-l{font-size:9px}
-  .stat-v{font-size:22px}
-  .g2{grid-template-columns:1fr}
-  .g3{grid-template-columns:1fr}
+  .main{height:calc(100dvh - var(--mob-nav) - env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .mob-nav{display:flex}
+
+  /* Panel layout */
+  .panel{padding:20px 16px 32px}
+  .ph{margin-bottom:16px;padding-bottom:0}
+  .ph-title{font-size:20px;letter-spacing:-.4px}
+  .ph-sub{font-size:11px;margin-top:3px}
+
+  /* Cards */
+  .stats{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .card{padding:16px;border-radius:16px;margin-bottom:12px}
+  .stat-l{font-size:9px;letter-spacing:.08em}
+  .stat-v{font-size:24px;letter-spacing:-.5px}
+
+  /* Prevent iOS input zoom (must be 16px+) */
+  input,textarea,select{font-size:16px!important}
+  .inp.sm{font-size:14px!important}
+
+  /* Grids */
+  .g2,.g3{grid-template-columns:1fr}
   .firm-stats{grid-template-columns:1fr 1fr}
   .metrics{grid-template-columns:1fr}
   .rules-grid{grid-template-columns:1fr}
-  .cs{padding:12px}
-  .ci{padding:10px 0}
-  .heatmap-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Daily check-in — bigger touch targets */
+  .cs{margin-bottom:12px}
+  .ci{padding:14px 0;gap:14px}
+  .cbox{width:24px;height:24px;min-width:24px;border-radius:6px}
+  .ci-title{font-size:14px}
+  .ci-sub{font-size:12px}
+
+  /* Heatmap scroll */
+  .heatmap-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+
+  /* Toast above nav */
   .toast{bottom:calc(var(--mob-nav) + env(safe-area-inset-bottom) + 12px);right:12px;left:12px;text-align:center}
-  /* Day mode section cards on mobile */
-  [data-theme="day"] .cs{padding:12px;margin-bottom:10px}
+
+  /* Day mode adjustments */
+  [data-theme="day"] .cs{padding:14px;border-radius:14px}
+  [data-theme="day"] .card{border-radius:16px}
 }
 @media(max-width:390px){
-  .stats{grid-template-columns:1fr 1fr}
-  .stat-v{font-size:20px}
-  .panel{padding:14px 12px 20px}
+  .panel{padding:16px 14px 28px}
+  .stat-v{font-size:22px}
+  .stats{gap:8px}
 }
 
 /* ══════════════════════════════════════════════
@@ -1257,23 +1293,26 @@ body{background:var(--bg);color:var(--t);font-family:'Inter',system-ui,-apple-sy
 <!-- ════ MOBILE NAV ════ -->
 <nav class="mob-nav">
   <div class="mob-nav-inner">
-    <button class="mob-btn active" id="mb-dash" onclick="navMob('dashboard','mb-dash')"><span class="mi">◈</span><span class="ml">Home</span></button>
+    <button class="mob-btn active" id="mb-dash" onclick="navMob('dashboard','mb-dash')"><span class="mi">⊞</span><span class="ml">Home</span></button>
     <button class="mob-btn" id="mb-daily" onclick="navMob('daily','mb-daily')"><span class="mi">✓</span><span class="ml">Daily</span></button>
     <button class="mob-btn" id="mb-goals" onclick="navMob('goals','mb-goals')"><span class="mi">◎</span><span class="ml">Goals</span></button>
     <button class="mob-btn" id="mb-money" onclick="navMob('propfirms','mb-money')"><span class="mi">◇</span><span class="ml">Money</span></button>
-    <button class="mob-btn" id="mb-more" onclick="openDrawer()"><span class="mi">≡</span><span class="ml">More</span></button>
+    <button class="mob-btn" id="mb-more" onclick="openDrawer()"><span class="mi">···</span><span class="ml">More</span></button>
   </div>
 </nav>
 <div class="mob-drawer" id="mob-drawer">
   <div class="mob-drawer-bg" onclick="closeDrawer()"></div>
   <div class="mob-drawer-sheet">
-    <button class="mob-drawer-btn" onclick="navMob('bankaccount','mb-more');closeDrawer()"><span>£</span> Bank Account</button>
-    <button class="mob-drawer-btn" onclick="navMob('payouts','mb-more');closeDrawer()"><span>↑</span> Payouts</button>
-    <button class="mob-drawer-btn" onclick="navMob('journal','mb-more');closeDrawer()"><span>≡</span> Journal</button>
-    <button class="mob-drawer-btn" onclick="navMob('review','mb-more');closeDrawer()"><span>↻</span> Review</button>
-    <button class="mob-drawer-btn" onclick="navMob('admin','mb-more');closeDrawer()"><span>☐</span> Life Admin</button>
-    <button class="mob-drawer-btn" onclick="exportData();closeDrawer()"><span>↓</span> Export backup</button>
-    <button class="mob-drawer-btn" onclick="document.getElementById('import-file').click();closeDrawer()"><span>↑</span> Import backup</button>
+    <div class="mob-drawer-handle"></div>
+    <div class="mob-drawer-grid">
+      <button class="mob-drawer-btn" onclick="navMob('bankaccount','mb-more');closeDrawer()"><span class="mdi">£</span><span>Bank Account</span></button>
+      <button class="mob-drawer-btn" onclick="navMob('payouts','mb-more');closeDrawer()"><span class="mdi">↑</span><span>Payouts</span></button>
+      <button class="mob-drawer-btn" onclick="navMob('journal','mb-more');closeDrawer()"><span class="mdi">≡</span><span>Journal</span></button>
+      <button class="mob-drawer-btn" onclick="navMob('review','mb-more');closeDrawer()"><span class="mdi">↻</span><span>Review</span></button>
+      <button class="mob-drawer-btn" onclick="navMob('admin','mb-more');closeDrawer()"><span class="mdi">☐</span><span>Life Admin</span></button>
+      <button class="mob-drawer-btn" onclick="exportData();closeDrawer()"><span class="mdi">↓</span><span>Export backup</span></button>
+      <button class="mob-drawer-btn" onclick="document.getElementById('import-file').click();closeDrawer()"><span class="mdi">↑</span><span>Import backup</span></button>
+    </div>
   </div>
 </div>
 
