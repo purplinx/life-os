@@ -20,7 +20,7 @@
   if (h >= 7 && h < 19) document.documentElement.setAttribute('data-theme','day');
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Supabase JS library removed — using direct REST API instead -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
@@ -1622,17 +1622,16 @@ window.addEventListener('beforeunload', () => {
   clearTimeout(saveTimer);
   saveTimer = null;
   if (curPanel === 'daily') commitSave();
-  // Also flush pending cloud push immediately on close
+  // Flush pending cloud push immediately on close
   clearTimeout(_sbSyncTimer);
   _sbSyncTimer = null;
-  if (_sb) {
-    try {
-      // Fire-and-forget sync on close (browser may or may not complete it)
-      navigator.sendBeacon
-        ? _sb.from('user_store').upsert({ id: SB_ROW, data: gS(), updated_at: new Date().toISOString() })
-        : null;
-    } catch(e) {}
-  }
+  try {
+    const payload = JSON.stringify({ id: SB_ROW, data: gS(), updated_at: new Date().toISOString() });
+    navigator.sendBeacon && navigator.sendBeacon(
+      `${SB_URL}/rest/v1/user_store`,
+      new Blob([payload], { type: 'application/json' })
+    );
+  } catch(e) {}
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -4014,25 +4013,24 @@ async function restoreSelectedCharts() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SUPABASE CLOUD SYNC
+// SUPABASE CLOUD SYNC — direct REST API (no library dependency)
 // ═══════════════════════════════════════════════════════════════
 const SB_URL = 'https://kjxpgshcoxgcksenzrbd.supabase.co';
 const SB_KEY = 'sb_publishable_I462MAzeBQ-TAkiDDq7pGw_q_GAZ40t';
 const SB_ROW = 'steph-os-v1';
-let _sb = null;
+let _sb    = true; // flag — always available with REST API
 let _sbSyncTimer = null;
 
+const _sbHeaders = {
+  'apikey':        SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY,
+  'Content-Type':  'application/json',
+  'Prefer':        'return=minimal'
+};
+
 function initSupabase() {
-  try {
-    if (typeof window.supabase === 'undefined') {
-      setTimeout(() => setSyncStatus('offline'), 500);
-      return;
-    }
-    _sb = window.supabase.createClient(SB_URL, SB_KEY);
-  } catch(e) {
-    console.warn('Supabase init failed', e);
-    setSyncStatus('offline');
-  }
+  // Nothing to initialise — REST API works directly
+  setSyncStatus('');
 }
 
 function setSyncStatus(status) {
@@ -4093,15 +4091,18 @@ function mergeById(local, remote, idKey = 'id') {
   return Object.values(map);
 }
 
-// Pull latest data from Supabase and merge with local
+// Pull latest data from Supabase REST API and merge with local
 async function pullFromCloud() {
-  if (!_sb) return;
   setSyncStatus('loading');
   try {
-    const { data, error } = await _sb.from('user_store').select('data').eq('id', SB_ROW).maybeSingle();
-    if (error) throw error;
-    if (data?.data) {
-      const merged = mergeStores(gS(), data.data);
+    const res = await fetch(
+      `${SB_URL}/rest/v1/user_store?id=eq.${SB_ROW}&select=data`,
+      { headers: _sbHeaders }
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    if (rows && rows.length > 0 && rows[0].data) {
+      const merged = mergeStores(gS(), rows[0].data);
       localStorage.setItem(SK, JSON.stringify(merged));
     }
     setSyncStatus('synced');
@@ -4111,18 +4112,24 @@ async function pullFromCloud() {
   }
 }
 
-// Push current data to Supabase (debounced 3s so we don't hammer on every keystroke)
+// Push current data to Supabase REST API (debounced 3s)
 function pushToCloud() {
-  if (!_sb) return;
   clearTimeout(_sbSyncTimer);
   _sbSyncTimer = setTimeout(async () => {
     setSyncStatus('syncing');
     try {
-      const { error } = await _sb.from('user_store')
-        .upsert({ id: SB_ROW, data: gS(), updated_at: new Date().toISOString() });
-      setSyncStatus(error ? 'error' : 'synced');
-      if (error) console.warn('Cloud push error:', error);
+      const res = await fetch(
+        `${SB_URL}/rest/v1/user_store`,
+        {
+          method:  'POST',
+          headers: { ..._sbHeaders, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+          body:    JSON.stringify({ id: SB_ROW, data: gS(), updated_at: new Date().toISOString() })
+        }
+      );
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      setSyncStatus('synced');
     } catch(e) {
+      console.warn('Cloud push failed:', e);
       setSyncStatus('offline');
     }
   }, 3000);
