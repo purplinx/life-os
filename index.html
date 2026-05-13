@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Tracker — Steph</title>
+  <meta http-equiv="refresh" content="0; url=steph-os.html">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <nav class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">Life Tracker</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#" data-view="dashboard" class="active">
+          <span class="nav-icon">⊞</span> Dashboard
+        </a></li>
+        <li><a href="#" data-view="goals">
+          <span class="nav-icon">◎</span> Goals
+        </a></li>
+        <li><a href="#" data-view="habits">
+          <span class="nav-icon">✓</span> Habits
+        </a></li>
+        <li><a href="#" data-view="mood">
+          <span class="nav-icon">◑</span> Mood
+        </a></li>
+        <li><a href="#" data-view="journal">
+          <span class="nav-icon">≡</span> Journal
+        </a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-sm" onclick="clearAllData()" style="width:100%;font-size:11px;color:var(--text-muted)">Reset Data</button>
+      </div>
+    </nav>
+    <main id="main-content"></main>
+  </div>
+
+  <div id="modal-overlay" class="hidden">
+    <div id="modal">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

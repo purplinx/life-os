@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Steph OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  cursor: none;
+}
+
+/* ── BACKGROUND ── */
+#bg {
+  position: fixed;
+  inset: -8%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.08s linear;
+  z-index: 0;
+  filter: brightness(0.65) saturate(1.15);
+  will-change: transform;
+}
+
+/* Fallback gradient (no internet) */
+#bg.fallback {
+  background: linear-gradient(135deg, #0a0a14 0%, #1a1428 30%, #0f1a2e 60%, #080808 100%);
+  filter: none;
+}
+
+/* ── OVERLAYS ── */
+.overlay-top {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.3) 0%,
+    rgba(0,0,0,0.0) 35%,
+    rgba(0,0,0,0.0) 55%,
+    rgba(0,0,0,0.55) 80%,
+    rgba(0,0,0,0.80) 100%
+  );
+  z-index: 1;
+}
+
+.overlay-vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);
+  z-index: 2;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor-glow {
+  position: fixed;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,168,67,0.12) 0%, transparent 65%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.4s ease;
+  mix-blend-mode: screen;
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(212,168,67,0.95);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 200;
+  transition: width 0.15s, height 0.15s, background 0.15s;
+  box-shadow: 0 0 12px rgba(212,168,67,0.6);
+}
+
+.cursor-dot.hovering {
+  width: 12px;
+  height: 12px;
+  background: rgba(240,200,96,1);
+}
+
+/* ── UI CHROME ── */
+.top-left {
+  position: fixed;
+  top: 36px;
+  left: 44px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: rgba(255,255,255,0.75);
+  pointer-events: none;
+}
+.logo span { color: #d4a843; }
+
+.top-right {
+  position: fixed;
+  top: 36px;
+  right: 44px;
+  z-index: 50;
+  text-align: right;
+}
+
+.date-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ── MAIN CONTENT ── */
+.content {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 0;
+}
+
+/* ── TITLE ── */
+.title-block {
+  margin-bottom: 28px;
+  line-height: 1;
+}
+
+.title-line {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(54px, 9.5vw, 112px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 0.92;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.title-line.line2 { color: #d4a843; }
+
+.char {
+  display: inline-block;
+  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+              text-shadow 0.25s ease,
+              color 0.25s ease;
+}
+
+/* Entrance animation */
+@keyframes charSlideIn {
+  from { opacity: 0; transform: translateY(40px) skewY(4deg); }
+  to   { opacity: 1; transform: translateY(0) skewY(0deg); }
+}
+
+.char.entering {
+  opacity: 0;
+  animation: charSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── DIVIDER LINE ── */
+.divider {
+  width: 1px;
+  height: 0;
+  background: rgba(212,168,67,0.4);
+  margin: 0 auto 28px;
+  animation: growLine 0.6s ease 1.2s forwards;
+}
+
+@keyframes growLine {
+  to { height: 40px; }
+}
+
+/* ── QUOTE ── */
+.quote {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.04em;
+  max-width: 520px;
+  line-height: 1.7;
+  font-style: italic;
+  margin-bottom: 44px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 1.3s forwards;
+}
+
+/* ── ENTER BUTTON ── */
+.enter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 40px;
+  background: rgba(212,168,67,0.12);
+  border: 1px solid rgba(212,168,67,0.4);
+  color: #d4a843;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 3px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.3, 1);
+  cursor: none;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 1.6s forwards;
+}
+
+.enter-btn:hover {
+  background: rgba(212,168,67,0.22);
+  border-color: rgba(212,168,67,0.75);
+  color: #f0c860;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(212,168,67,0.18), 0 0 0 1px rgba(212,168,67,0.15);
+}
+
+.enter-arrow {
+  font-size: 16px;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.3, 1);
+  display: inline-block;
+}
+
+.enter-btn:hover .enter-arrow { transform: translateX(8px); }
+
+/* ── BOTTOM ── */
+.bottom-bar {
+  position: fixed;
+  bottom: 28px;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 0 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.img-scene {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+}
+
+.keyboard-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 640px) {
+  html, body { cursor: auto; overflow: auto; }
+  .title-line { font-size: clamp(40px, 14vw, 70px); letter-spacing: -1.5px; }
+  .top-left { top: 24px; left: 20px; }
+  .top-right { top: 24px; right: 20px; }
+  .bottom-bar { padding: 0 20px; }
+  .cursor-glow, .cursor-dot { display: none; }
+  .keyboard-hint { display: none; }
+}
+
+@media (hover: none) {
+  .cursor-glow, .cursor-dot { display: none; }
+  html, body { cursor: auto; }
+}
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div class="overlay-top"></div>
+<div class="overlay-vignette"></div>
+
+<!-- Custom cursor -->
+<div class="cursor-glow" id="cursor-glow"></div>
+<div class="cursor-dot"  id="cursor-dot"></div>
+
+<!-- Top chrome -->
+<div class="top-left">
+  <div class="logo">Steph <span>OS</span></div>
+</div>
+<div class="top-right">
+  <div class="date-line" id="date-line">—</div>
+</div>
+
+<!-- Centre content -->
+<div class="content">
+  <div class="title-block">
+    <div class="title-line line1" id="t1">WELCOME</div>
+    <div class="title-line line2" id="t2">BACK, BOSS.</div>
+  </div>
+  <div class="divider"></div>
+  <p class="quote" id="landing-quote"></p>
+  <a href="steph-os.html" class="enter-btn" id="enter-btn">
+    Enter <span class="enter-arrow">→</span>
+  </a>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <div class="img-scene" id="img-scene">—</div>
+  <div class="keyboard-hint">press any key to enter</div>
+</div>
+
+<script>
+'use strict';
+
+// ── DATE ──────────────────────────────────────────────────────
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const now    = new Date();
+const doy    = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000); // day of year
+
+document.getElementById('date-line').textContent =
+  DAYS[now.getDay()] + ' · ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+
+// ── BACKGROUNDS ───────────────────────────────────────────────
+// Curated Unsplash landscape photos — mountains, sky, vast terrain
+const SCENES = [
+  { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b', label: 'Mountains in morning fog' },
+  { url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', label: 'Himalayan peak' },
+  { url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba', label: 'Milky Way over the Alps' },
+  { url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b', label: 'Aerial mountain range' },
+  { url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1', label: 'Alpine lake reflection' },
+  { url: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606', label: 'Jagged alpine peaks' },
+  { url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e', label: 'Open valley at dusk' },
+  { url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0', label: 'Endless ocean horizon' },
+  { url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e', label: 'Cathedral forest' },
+  { url: 'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f', label: 'Saharan sand dunes' },
+  { url: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8', label: 'Golden hour summit' },
+  { url: 'https://images.unsplash.com/photo-1529528744093-6f8abeee511d', label: 'Dramatic storm clouds' },
+  { url: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429', label: 'Valley at first light' },
+  { url: 'https://images.unsplash.com/photo-1480497490787-505ec076689f', label: 'Mist-covered mountains' },
+  { url: 'https://images.unsplash.com/photo-1433477155337-9aea4e790195', label: 'Waterfall in the wild' },
+  { url: 'https://images.unsplash.com/photo-1493514789931-586cb221d7a7', label: 'Frozen tundra' },
+  { url: 'https://images.unsplash.com/photo-1547200166-b79655f0b7fd', label: 'Dark volcanic range' },
+  { url: 'https://images.unsplash.com/photo-1499346030926-9a72daac6c63', label: 'Lightning over the mountains' },
+  { url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071', label: 'Still mountain lake' },
+  { url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470', label: 'Vast wilderness horizon' },
+  { url: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71', label: 'Stars over the peaks' },
+  { url: 'https://images.unsplash.com/photo-1444464666168-49d633b86797', label: 'Ocean and cliffs at dawn' },
+  { url: 'https://images.unsplash.com/photo-1490750967868-88df5691cc40', label: 'Ice fields at blue hour' },
+  { url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19', label: 'Endless savanna' },
+  { url: 'https://images.unsplash.com/photo-1562408590-e32931084e23', label: 'Northern fjord' },
+  { url: 'https://images.unsplash.com/photo-1557456170-0cf4f4d0d362', label: 'Mountain at sunrise fire' },
+  { url: 'https://images.unsplash.com/photo-1520962880247-cfaf541c8724', label: 'Cloud sea above the peaks' },
+  { url: 'https://images.unsplash.com/photo-1445307806294-bff7f67ff225', label: 'Emerald highland valley' },
+];
+
+const scene = SCENES[doy % SCENES.length];
+const bgEl  = document.getElementById('bg');
+document.getElementById('img-scene').textContent = scene.label;
+
+// Load image — fallback to gradient if it fails
+const img = new Image();
+img.onload = () => {
+  bgEl.style.backgroundImage = `url('${scene.url}?w=1920&h=1080&fit=crop&q=80&auto=format')`;
+  bgEl.classList.remove('fallback');
+};
+img.onerror = () => bgEl.classList.add('fallback');
+img.src = `${scene.url}?w=1920&h=1080&fit=crop&q=80&auto=format`;
+bgEl.classList.add('fallback'); // start with fallback until loaded
+
+// ── QUOTES ───────────────────────────────────────────────────
+const QUOTES = [
+  "You have power over your mind — not outside events. Realise this. — Marcus Aurelius",
+  "We are what we repeatedly do. Excellence is not an act, but a habit. — Aristotle",
+  "Begin at once to live. Count each day as a separate life. — Seneca",
+  "The obstacle is the way. — Marcus Aurelius",
+  "You have the right to act, but never to the fruits of action. — Bhagavad Gita",
+  "Luck is what happens when preparation meets opportunity. — Seneca",
+  "No man is free who is not master of himself. — Epictetus",
+  "Day by day, what you choose and what you do is who you become. — Heraclitus",
+  "Character is destiny. — Heraclitus",
+  "The soul becomes dyed with the colour of its thoughts. — Marcus Aurelius",
+  "What you seek is seeking you. — Rumi",
+  "Fear not. What is not real, never was and never will be. — Bhagavad Gita",
+  "A river cuts through rock not by power, but by persistence. — Unknown",
+  "We suffer more in imagination than in reality. — Seneca",
+  "The market rewards patience. Do the work. — Unknown",
+  "Big results require big ambitions. — Heraclitus",
+  "Plant trees under whose shade you do not plan to sit. — Hindu proverb",
+  "You don't rise to your goals. You fall to your systems. — James Clear",
+  "Victorious warriors win first — then go to war. — Sun Tzu",
+  "First say to yourself what you would be; then do what you have to do. — Epictetus",
+  "The present moment always will have been. — Eckhart Tolle",
+  "Difficulties strengthen the mind, as labour does the body. — Seneca",
+  "A gem cannot be polished without friction. — Seneca",
+  "He who conquers his mind conquers his greatest enemy. — Bhagavad Gita 6:6",
+  "What you do in the dark puts you in the light. — Unknown",
+  "Confine yourself to the present. — Marcus Aurelius",
+  "Do not be afraid of tomorrow; look back and you'll see the strength you had yesterday. — Unknown",
+  "Your future self is watching you right now through your memories. — Aubrey de Grey",
+];
+
+document.getElementById('landing-quote').textContent =
+  '"' + QUOTES[doy % QUOTES.length] + '"';
+
+// ── MAGNETIC TITLE ────────────────────────────────────────────
+const allChars = [];
+
+function buildTitle(id, delay0) {
+  const el   = document.getElementById(id);
+  const text = el.textContent;
+  el.innerHTML = '';
+
+  text.split('').forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className    = 'char entering';
+    span.textContent  = ch === ' ' ? ' ' : ch;
+    span.style.animationDelay = (delay0 + i * 0.038) + 's';
+    // After entrance animation, remove class so transitions take over
+    span.addEventListener('animationend', () => span.classList.remove('entering'), { once: true });
+    el.appendChild(span);
+    allChars.push(span);
+  });
+}
+
+buildTitle('t1', 0.1);
+buildTitle('t2', 0.45);
+
+// ── MOUSE / TOUCH INTERACTION ─────────────────────────────────
+const glowEl   = document.getElementById('cursor-glow');
+const dotEl    = document.getElementById('cursor-dot');
+const enterBtn = document.getElementById('enter-btn');
+let   rafId    = null;
+let   mouseX   = window.innerWidth  / 2;
+let   mouseY   = window.innerHeight / 2;
+
+function onMouseMove(e) {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+
+  // Move cursor elements
+  glowEl.style.left = mouseX + 'px';
+  glowEl.style.top  = mouseY + 'px';
+  dotEl.style.left  = mouseX + 'px';
+  dotEl.style.top   = mouseY + 'px';
+
+  // Parallax background
+  const px = (mouseX / window.innerWidth  - 0.5) * 28;
+  const py = (mouseY / window.innerHeight - 0.5) * 18;
+  bgEl.style.transform = `scale(1.12) translate(${px}px, ${py}px)`;
+
+  // Magnetic character repulsion
+  allChars.forEach(char => {
+    const rect = char.getBoundingClientRect();
+    const cx   = rect.left + rect.width  / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dx   = mouseX - cx;
+    const dy   = mouseY - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const R    = 170; // influence radius
+
+    if (dist < R && dist > 0) {
+      const t       = 1 - dist / R;
+      const force   = t * t;            // quadratic — sharp near cursor
+      const angle   = Math.atan2(dy, dx);
+      const rx      = -Math.cos(angle) * force * 62;
+      const ry      = -Math.sin(angle) * force * 42;
+      const rot     = dx * force * 0.07;
+      const sc      = 1 + force * 0.18;
+      const glow    = Math.round(force * 32);
+      char.style.transform  = `translate(${rx}px,${ry}px) rotate(${rot}deg) scale(${sc})`;
+      char.style.textShadow = `0 0 ${glow}px rgba(212,168,67,${(force * 0.9).toFixed(2)})`;
+      char.style.color      = `rgba(255,255,255,${(0.75 + force * 0.25).toFixed(2)})`;
+    } else {
+      char.style.transform  = '';
+      char.style.textShadow = '';
+      char.style.color      = '';
+    }
+  });
+}
+
+document.addEventListener('mousemove', onMouseMove);
+
+document.addEventListener('mouseleave', () => {
+  allChars.forEach(ch => {
+    ch.style.transform  = '';
+    ch.style.textShadow = '';
+    ch.style.color      = '';
+  });
+});
+
+// Hover state on enter button changes cursor dot
+enterBtn.addEventListener('mouseenter', () => dotEl.classList.add('hovering'));
+enterBtn.addEventListener('mouseleave', () => dotEl.classList.remove('hovering'));
+
+// Touch parallax (mobile)
+document.addEventListener('touchmove', e => {
+  const t  = e.touches[0];
+  const px = (t.clientX / window.innerWidth  - 0.5) * 16;
+  const py = (t.clientY / window.innerHeight - 0.5) * 10;
+  bgEl.style.transform = `scale(1.08) translate(${px}px, ${py}px)`;
+}, { passive: true });
+
+// Keyboard shortcut — any key goes to app
+document.addEventListener('keydown', e => {
+  if (!['Tab','Shift','Meta','Alt','Control','CapsLock'].includes(e.key)) {
+    window.location.href = 'steph-os.html';
+  }
+});
+
+// Hide custom cursor on touch-only devices
+if (window.matchMedia('(hover: none)').matches) {
+  glowEl.style.display = 'none';
+  dotEl.style.display  = 'none';
+  document.documentElement.style.cursor = 'auto';
+  document.body.style.cursor = 'auto';
+}
+</script>
+</body>
+</html>
