@@ -4109,7 +4109,9 @@ function mergeById(local, remote, idKey = 'id') {
   return Object.values(map);
 }
 
-// Pull latest data from Supabase REST API and merge with local
+// Pull latest data from Supabase REST API
+// Remote (cloud) wins — it's the canonical truth since the laptop just pushed to it.
+// Local keys not in remote are kept (safety net for anything not yet pushed).
 async function pullFromCloud() {
   setSyncStatus('loading');
   try {
@@ -4120,7 +4122,10 @@ async function pullFromCloud() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
     if (rows && rows.length > 0 && rows[0].data) {
-      const merged = mergeStores(gS(), rows[0].data);
+      const remote = rows[0].data;
+      const local  = gS();
+      // Remote overwrites local — cloud is always the freshest version
+      const merged = { ...local, ...remote };
       localStorage.setItem(SK, JSON.stringify(merged));
     }
     setSyncStatus('synced');
@@ -4183,6 +4188,19 @@ pullFromCloud().finally(() => {
   renderDash();
   setTimeout(checkWeekModal, 800);
 });
+
+// Background sync every 60 seconds — picks up changes from other devices
+setInterval(async () => {
+  if (document.hidden) return; // don't sync when tab is in background
+  const before = JSON.stringify(gS());
+  await pullFromCloud();
+  const after = JSON.stringify(gS());
+  if (before !== after) {
+    // Data changed — re-render to show updated info
+    renderDash();
+    if (curPanel === 'daily') refreshDaily();
+  }
+}, 60000);
 </script>
 </body>
 </html>
