@@ -4118,15 +4118,26 @@ function pushToCloud() {
   _sbSyncTimer = setTimeout(async () => {
     setSyncStatus('syncing');
     try {
-      const res = await fetch(
-        `${SB_URL}/rest/v1/user_store`,
-        {
-          method:  'POST',
-          headers: { ..._sbHeaders, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-          body:    JSON.stringify({ id: SB_ROW, data: gS(), updated_at: new Date().toISOString() })
-        }
+      const payload = { id: SB_ROW, data: gS(), updated_at: new Date().toISOString() };
+
+      // Try PATCH first (update existing row)
+      let res = await fetch(
+        `${SB_URL}/rest/v1/user_store?id=eq.${SB_ROW}`,
+        { method: 'PATCH', headers: _sbHeaders, body: JSON.stringify(payload) }
       );
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      // If row doesn't exist yet, create it with POST
+      if (res.status === 404 || res.status === 406) {
+        res = await fetch(
+          `${SB_URL}/rest/v1/user_store`,
+          { method: 'POST', headers: { ..._sbHeaders, 'Prefer': 'return=minimal' }, body: JSON.stringify(payload) }
+        );
+      }
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`HTTP ${res.status}: ${err}`);
+      }
       setSyncStatus('synced');
     } catch(e) {
       console.warn('Cloud push failed:', e);
