@@ -453,52 +453,75 @@ body{background:var(--bg);color:var(--t);font-family:'Inter',system-ui,-apple-sy
 @media(max-width:768px){
   html,body{overflow:hidden}
   .sb{display:none}
-  .main{height:calc(100dvh - var(--mob-nav) - env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .main{height:calc(100dvh - var(--mob-nav) - env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
   .mob-nav{display:flex}
 
-  /* Panel layout */
-  .panel{padding:20px 16px 32px}
-  .ph{margin-bottom:16px;padding-bottom:0}
-  .ph-title{font-size:20px;letter-spacing:-.4px}
-  .ph-sub{font-size:11px;margin-top:3px}
+  /* ─ Nav labels: clean, not uppercase ─ */
+  .mob-btn .ml{text-transform:none;font-size:10px;font-weight:600;letter-spacing:0}
+  .mob-btn .mi{font-size:22px}
 
-  /* Cards */
+  /* ─ Panel padding ─ */
+  .panel{padding:24px 18px 40px}
+
+  /* ─ Page header ─ */
+  .ph{margin-bottom:18px}
+  .ph-title{font-size:22px;letter-spacing:-.5px}
+  .ph-sub{font-size:11px;margin-top:4px}
+
+  /* ─ Motivational quote ─ */
+  .motiv{padding:14px 16px;margin-bottom:16px}
+  .motiv-tag{font-size:8px;margin-bottom:8px}
+  .motiv-quote{font-size:13px;line-height:1.65;margin-bottom:8px}
+  .motiv-author{font-size:10px}
+
+  /* ─ Stats grid ─ */
   .stats{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat-l{font-size:8px;letter-spacing:.1em;margin-bottom:6px}
+  .stat-v{font-size:22px;letter-spacing:-.5px}
+  .stat-s{font-size:9px;margin-top:3px}
+
+  /* ─ Cards ─ */
   .card{padding:16px;border-radius:16px;margin-bottom:12px}
-  .stat-l{font-size:9px;letter-spacing:.08em}
-  .stat-v{font-size:24px;letter-spacing:-.5px}
+  .card-title{font-size:12px}
+  .card-hdr{margin-bottom:12px}
 
-  /* Prevent iOS input zoom (must be 16px+) */
+  /* ─ iOS input zoom prevention ─ */
   input,textarea,select{font-size:16px!important}
-  .inp.sm{font-size:14px!important}
+  .inp.sm,.inp.time{font-size:15px!important}
 
-  /* Grids */
-  .g2,.g3{grid-template-columns:1fr}
+  /* ─ Grids ─ */
+  .g2,.g3{grid-template-columns:1fr;gap:0}
   .firm-stats{grid-template-columns:1fr 1fr}
   .metrics{grid-template-columns:1fr}
-  .rules-grid{grid-template-columns:1fr}
+  .rules-grid{grid-template-columns:1fr 1fr}
 
-  /* Daily check-in — bigger touch targets */
-  .cs{margin-bottom:12px}
-  .ci{padding:14px 0;gap:14px}
-  .cbox{width:24px;height:24px;min-width:24px;border-radius:6px}
-  .ci-title{font-size:14px}
-  .ci-sub{font-size:12px}
+  /* ─ Daily check-in ─ */
+  .cs{margin-bottom:14px}
+  .cs-hdr{font-size:8px;letter-spacing:.15em;padding-bottom:10px;margin-bottom:4px}
+  .ci{padding:13px 0;gap:14px;align-items:center}
+  .cbox{width:24px;height:24px;min-width:24px;border-radius:7px;flex-shrink:0}
+  .ci-title{font-size:14px;font-weight:600}
+  .ci-sub{font-size:12px;margin-top:2px;line-height:1.5}
 
-  /* Heatmap scroll */
-  .heatmap-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+  /* ─ Heatmap ─ */
+  .heatmap-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+  .hm-cell{width:12px;height:12px}
 
-  /* Toast above nav */
-  .toast{bottom:calc(var(--mob-nav) + env(safe-area-inset-bottom) + 12px);right:12px;left:12px;text-align:center}
+  /* ─ Toast ─ */
+  .toast{bottom:calc(var(--mob-nav) + env(safe-area-inset-bottom) + 16px);right:14px;left:14px;text-align:center;font-size:11px}
 
-  /* Day mode adjustments */
-  [data-theme="day"] .cs{padding:14px;border-radius:14px}
+  /* ─ Day mode ─ */
+  [data-theme="day"] .cs{padding:14px;border-radius:14px;margin-bottom:10px}
   [data-theme="day"] .card{border-radius:16px}
+  [data-theme="day"] .mob-btn{color:var(--t3)}
+  [data-theme="day"] .mob-btn.active{color:var(--gold)}
 }
+
 @media(max-width:390px){
-  .panel{padding:16px 14px 28px}
-  .stat-v{font-size:22px}
+  .panel{padding:20px 14px 36px}
   .stats{gap:8px}
+  .stat-v{font-size:20px}
+  .ph-title{font-size:20px}
 }
 
 /* ══════════════════════════════════════════════
@@ -718,10 +741,54 @@ body{background:var(--bg);color:var(--t);font-family:'Inter',system-ui,-apple-sy
 @media(max-width:640px){
   .ls-title{font-size:clamp(52px,17vw,86px);letter-spacing:-2px}
   .ls-top-left{top:22px;left:20px}.ls-top-right{top:22px;right:20px}
-  .ls-bottom{padding:0 20px}
   #ls-cursor-glow,#ls-cursor-dot{display:none}
   #ls{cursor:auto}
   .ls-om{font-size:clamp(160px,55vw,280px)}
+}
+
+/* ── LANDING PAGE — MOBILE PORTRAIT ── */
+@media(max-width:768px){
+  /* Full-screen — account for iOS dynamic island + browser bar */
+  #ls{height:100dvh}
+
+  /* Content: push header up, button down */
+  .ls-content{
+    justify-content:space-between;
+    padding:max(env(safe-area-inset-top),52px) 28px max(env(safe-area-inset-bottom),48px);
+    gap:0;
+  }
+
+  /* Top cluster */
+  .ls-eyebrow{font-size:10px;letter-spacing:.22em;margin-bottom:8px}
+  .ls-title{
+    font-size:clamp(60px,20vw,92px);
+    letter-spacing:-3px;
+    margin-bottom:16px;
+    line-height:.9;
+  }
+  .ls-divider{margin-bottom:16px}
+
+  /* Quote tighter */
+  .ls-quote{font-size:11px;line-height:1.75;margin-bottom:28px;letter-spacing:.02em}
+
+  /* Enter button — full width, proper tap target */
+  .ls-enter{
+    width:100%;max-width:none;
+    justify-content:center;
+    padding:18px 20px;
+    font-size:12px;letter-spacing:.18em;
+    border-radius:8px;
+    cursor:auto;
+    opacity:1; /* always visible without needing GSAP animation */
+  }
+
+  /* Hide desktop-only elements */
+  .ls-bottom{display:none}
+  .ls-om{display:none}
+  .ls-top-right{display:none} /* date shown elsewhere */
+
+  /* Logo smaller */
+  .ls-logo{font-size:13px}
 }
 </style>
 </head>
@@ -3572,39 +3639,42 @@ if ('serviceWorker' in navigator) {
   }
 
   // ── GSAP ENTRANCE ANIMATION ──────────────────────────────────
-  if (typeof gsap !== 'undefined') {
+  const isMobileDevice = window.matchMedia('(max-width:768px)').matches;
+
+  if (typeof gsap !== 'undefined' && !isMobileDevice) {
+    // Desktop: full cinematic entrance
     const tl = gsap.timeline({ delay: 0.2 });
-
-    // Chrome fades in
     tl.to(['#ls-chrome-l','#ls-chrome-r','#ls-bottom'], { opacity: 1, duration: 1.2, ease: 'power2.out', stagger: 0.15 }, 0);
-
-    // Fog layers drift in
     tl.to('.ls-fog', { opacity: 1, duration: 2.5, ease: 'power1.inOut', stagger: 0.4 }, 0.3);
-
-    // Eyebrow label
     tl.to('#ls-eyebrow', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0.6);
-
-    // Title sweeps up
     tl.fromTo('#ls-title', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1.0, ease: 'power3.out' }, 0.8);
-
-    // Divider line grows
     tl.to('#ls-divider', { width: 200, duration: 0.8, ease: 'power2.inOut' }, 1.2);
-
-    // Quote fades in
     tl.to('#ls-quote', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 1.5);
-
-    // Enter button appears + starts pulsing
     tl.to('#ls-enter', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', onComplete: () => {
       document.getElementById('ls-enter').classList.add('pulsing');
     }}, 1.8);
   } else {
-    // Fallback: show everything without animation
+    // Mobile or no GSAP: show everything immediately, no waiting
+    ['#ls-chrome-l','#ls-chrome-r','#ls-eyebrow','#ls-title','#ls-quote','#ls-enter'].forEach(id => {
+      const el = document.querySelector(id);
+      if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
+    });
+    document.getElementById('ls-divider').style.width = '160px';
+    document.getElementById('ls-enter').classList.add('pulsing');
+    // Still animate fog gently on mobile if GSAP available
+    if (typeof gsap !== 'undefined') {
+      gsap.to('.ls-fog', { opacity: 1, duration: 2, ease: 'power1.inOut', stagger: 0.3, delay: 0.3 });
+    }
+  }
+
+  // Legacy fallback block kept for safety
+  if (false) {
     ['#ls-chrome-l','#ls-chrome-r','#ls-bottom','#ls-eyebrow','#ls-title','#ls-quote','#ls-enter'].forEach(id => {
       const el = document.querySelector(id);
       if (el) el.style.opacity = '1';
     });
     document.getElementById('ls-divider').style.width = '200px';
-  }
+  } // end legacy fallback
 
   // ── CUSTOM CURSOR ────────────────────────────────────────────
   const curGlow = document.getElementById('ls-cursor-glow');
